@@ -6,7 +6,6 @@ services:
       dockerfile: ./docker/app/Dockerfile
     ports:
       - "9002:9000"
-      - "${VITE_PORT}:5173"
     restart: always
     volumes:
       - .:/var/www/html
@@ -15,10 +14,25 @@ services:
       - gerenciador_viagens
     depends_on:
       - db
+    
+  frontend:
+    container_name: gerenciador-viagens-frontend
+    build:
+      context: ../frontend
+      dockerfile: ../frontend/Dockerfile
+    ports:
+      - "${VITE_PORT}:5173"
+    restart: always
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    networks:
+      - gerenciador_viagens
 
   nginx:
     container_name: gerenciador-viagens-nginx
     image: nginx:alpine
+    restart: always
     ports:
       - "9003:9000"
       - "${NGINX_PORT}:80"

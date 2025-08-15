@@ -30,16 +30,7 @@ RUN apt-get install -y nginx
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g npm@latest
-
 COPY . /var/www/html
-
-RUN cd /var/www/html \
-    && composer install --no-interaction --optimize-autoloader \
-    && npm install \
-    && npm run build
 
 RUN sed -i 's/listen = \/run\/php\/php8.4-fpm.sock/listen = 9000/' /etc/php/8.4/fpm/pool.d/www.conf
 
