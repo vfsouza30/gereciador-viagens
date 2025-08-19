@@ -7,6 +7,8 @@ use Carbon\Carbon;
 
 use App\Enums\StatusOrderEnum;
 
+use App\Notifications\OrderApprovedNotification;
+
 use App\Http\Requests\Store\StoreOrderRequest;
 
 use App\Services\StatusOrderService;
@@ -59,7 +61,7 @@ class OrderController extends Controller
             'destination_id' => $request->destination_id,
             'departure_date' => $request->departure_date,
             'return_date' => $request->return_date,
-            'status' => StatusOrderEnum::REQUESTED->value, // Default status
+            'status' => StatusOrderEnum::REQUESTED->value,
         ]);
 
         return response()->json(['message' => 'Pedido criado com sucesso!!'], 201);
@@ -93,10 +95,14 @@ class OrderController extends Controller
     public function update(Request $request, string $id)
     {
         $order = Order::findOrFail($id);
-        
-        $order->update([            
+        $oldStatus = $order->status;
+        $order->update([
             'status' => $request->status
         ]);
+        
+        if ($oldStatus != $request->status && $request->status == StatusOrderEnum::APPROVED->value) {
+            $order->user->notify(new OrderApprovedNotification($order));
+        }
 
         return response()->json(['message' => 'Pedido atualizado com sucesso!']);
     }

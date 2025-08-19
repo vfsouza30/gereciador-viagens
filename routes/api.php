@@ -19,4 +19,12 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/orders/{id}', [OrderController::class, 'show']);    
     Route::put('/orders/{id}', [OrderController::class, 'update']);
     Route::get('/destinations', [OrderController::class, 'destinations']);
+    
+    Route::get('/notifications', function () {
+        return auth()->user()->notifications()->orderBy('created_at', 'desc')->take(10)->get();
+    });
+    Route::post('/notifications/read', function () {
+        auth()->user()->unreadNotifications->markAsRead();
+        return response()->json(['message' => 'Notificações marcadas como lidas']);
+    });
 });
